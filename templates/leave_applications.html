@@ -1,0 +1,285 @@
+{% extends "layouts/base.html" %}
+{% block title %} Leave Applications {% endblock %}
+{% block content %}
+<div class="pc-container">
+    <div class="pcoded-content">
+        <!-- [ breadcrumb ] start -->
+        <div class="page-header">
+            <div class="page-block">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <div class="page-header-title">
+                            <h5 class="m-b-10">Leave Applications</h5>
+                        </div>
+                        <ul class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+                            <li class="breadcrumb-item">Leave Applications</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- [ breadcrumb ] end -->
+
+        <!-- Leave Applications Table -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        {% csrf_token %}
+                        <h5>Leave Applications</h5>
+                    </div>
+                    <div class="card-body table-border-style">
+                        <div class="table-responsive">
+                            <table id="leaveApplicationTable" class="table table-striped" cellspacing="0" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th class="th-sm">Employee</th>
+                                        <th class="th-sm">Date</th>
+                                        <th class="th-sm">Duration</th>
+                                        <th class="th-sm">Reason</th>
+                                        <th class="th-sm">Status</th>
+                                        <th class="th-sm"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for leave in leave_applications %}
+                                    <tr>
+                                        <td class="employee">{{leave.employee.name}}</td>
+                                        <td>{{leave.date}}</td>
+                                        <td class="duration">{{leave.duration}}</td>
+                                        <td>{{leave.description}}</td>
+                                        <td>
+                                            <span class="status_value">{{leave.status}}</span>
+                                            <div class="btn-group" role="group">
+                                                <button type="button" class="btn btn-primary dropdown-toggle btnGroupDrop1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
+                                                <div class="dropdown-menu status_dropdown" aria-labelledby="btnGroupDrop1"> 
+                                                    <a class="dropdown-item" href="#" onclick="changeValue(this)">Not Approved</a>
+                                                    <a class="dropdown-item" href="#" onclick="changeValue(this)">Approved</a>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <button 
+                                                class="btn btn-primary save_status" 
+                                                data-id="{{ leave.id }}" 
+                                                data-status="Approved"
+                                            >
+                                                Save Status
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th>Employee</th>
+                                        <th>Date</th>
+                                        <th>Duration</th>
+                                        <th>Reason</th>
+                                        <th>Status</th>
+                                        <th></th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block scripts %}
+<script type="text/javascript">
+    $(document).ready(function(){
+        // Initialize DataTable for leave applications
+        $('#leaveApplicationTable').dataTable({
+            columnDefs: [{
+                orderable: false,
+                className: 'select-checkbox',
+                targets: 0
+            }],
+            select: {
+                style: 'os',
+                selector: 'td:first-child'
+            }
+        });
+
+        // Dropdown functionality using jQuery
+        $(".dropdown-toggle").on('click', function(e) {
+            var $this = $(this);
+            var $dropdownMenu = $this.siblings(".dropdown-menu");
+
+            // Toggle visibility of the dropdown menu
+            $dropdownMenu.toggleClass("show");
+
+            // Close other dropdowns
+            $(".dropdown-menu").not($dropdownMenu).removeClass("show");
+
+            // Prevent click event from propagating
+            e.stopPropagation();
+        });
+
+        // Handling dropdown item click and status change
+        $("#leaveApplicationTable").on("click", ".status_dropdown a", function(){
+            var txt = $(this).text();
+            var href = $(this).parents('tr').find(".save_status").attr('href');
+            var employee = $(this).parents('tr').find(".employee").text();
+            var duration = $(this).parents('tr').find(".duration").text();
+
+            $(this).parents('td').find('.status_value').text(txt);
+            $(this).parents('tr').find(".save_status").removeClass('disabled');
+            $(this).parents('tr').find(".save_status").attr('href', href+'/?employee='+employee+'&duration='+duration+'&status='+txt);
+        });
+
+        // Close dropdown if clicked outside
+        $(document).on('click', function (e) {
+            if (!$(e.target).closest('.btn-group').length) {
+                $(".dropdown-menu").removeClass("show");
+            }
+        });
+    });
+</script>
+{% block notification_scripts %}
+<script>
+    function showNotification(message, id) {
+        const notificationBox = document.createElement('div');
+        notificationBox.classList.add('notification');
+        notificationBox.innerText = message;
+        
+        // Add an event listener to mark the notification as read when clicked
+        notificationBox.addEventListener('click', function() {
+            markNotificationAsRead(id); // Bildirimi okundu olarak işaretle
+            notificationBox.remove(); // Bildirimi ekrandan kaldır
+        });
+
+        // Add the notification to the body
+        document.body.appendChild(notificationBox);
+
+        // Remove the notification after 5 seconds if not clicked
+        setTimeout(function() {
+            notificationBox.remove();
+        }, 5000);
+    }
+
+    function markNotificationAsRead(id) {
+        $.ajax({
+            url: `/mark-notification-as-read/${id}/`,  // API endpoint
+            method: 'POST',
+            data: {
+                csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),  // CSRF Token
+            },
+            success: function(response) {
+                console.log(response.message); // Debug: Bildirim başarıyla okundu
+            },
+            error: function(xhr, status, error) {
+                console.error("Error marking notification as read:", error);
+            }
+        });
+    }
+
+    // Bildirimleri düzenli olarak kontrol et ve göster
+    setInterval(function() {
+        $.ajax({
+            url: "{% url 'get_notifications' %}",  // API endpoint
+            method: "GET",
+            success: function(response) {
+                let notifications = response.notifications;
+                if (notifications.length > 0) {
+                    notifications.forEach(function(notification) {
+                        showNotification(notification.message, notification.id);  // Bildirimleri göster
+                    });
+                }
+            }
+        });
+    }, 5000);  // Her 5 saniyede bir bildirim kontrolü
+
+    $(document).ready(function () {
+    // Save status button click
+    $('.save_status').on('click', function (e) {
+        e.preventDefault(); // Prevent default link behavior
+
+        const button = $(this);
+        const leaveId = button.data('id');
+        const status = button.closest('tr').find('.status_value').text().trim(); // Get selected status text
+
+        // Send AJAX request
+        $.ajax({
+            url: "{% url 'save_leave_status' %}",
+            method: 'POST',
+            data: {
+                csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
+                leave_id: leaveId,
+                status: status,
+            },
+            success: function (response) {
+                if (response.success) {
+                    // Update the status display
+                    button.closest('tr').find('.status_value').text(status);
+                    button.addClass('disabled'); // Disable the button
+                } else {
+                    alert(response.message); // Show error message
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Error updating leave status:', error);
+            },
+        });
+    });
+
+    // Dropdown item click
+    $(".status_dropdown a").on("click", function () {
+        const selectedStatus = $(this).text(); // Get the selected dropdown text
+        const statusValueSpan = $(this).closest('td').find('.status_value'); // Find the status value span
+        const saveButton = $(this).closest('tr').find('.save_status'); // Find the corresponding save button
+
+        // Update the status value text
+        statusValueSpan.text(selectedStatus);
+
+        // Enable the save button
+        saveButton.removeClass('disabled');
+    });
+});
+
+
+</script>
+
+<style>
+    .notification {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background-color: #f44336;
+        color: white;
+        padding: 15px;
+        border-radius: 5px;
+        z-index: 1000;
+        animation: fadeIn 1s, fadeOut 1s 4s;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeOut {
+        from {
+            opacity: 1;
+        }
+        to {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+    }
+</style>
+{% endblock %}
+
+{% endblock %}

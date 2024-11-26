@@ -1,0 +1,388 @@
+{% extends "layouts/base.html" %}
+{% block title %} Dashboard {% endblock %}
+{% load static %}
+
+{% block content %}
+<div class="pc-container">
+    <div class="pcoded-content">
+        <!-- [ breadcrumb ] start -->
+        <div class="page-header">
+            <div class="page-block">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <div class="page-header-title">
+                            <h5 class="m-b-10">Dashboard</h5>
+                        </div>
+                        <ul class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="#">Home</a></li>
+                            <li class="breadcrumb-item">Dashboard</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- [ breadcrumb ] end -->
+<!-- Geç Kalma Tablosu -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <form method="get" action="{% url 'super-admin' %}">
+                <select name="new_user">
+                    <option value="" {% if not new_user_filter %}selected{% endif %}>All Users</option>
+                    <option value="True" {% if new_user_filter == 'True' %}selected{% endif %}>New Users</option>
+                    <option value="False" {% if new_user_filter == 'False' %}selected{% endif %}>Existing Users</option>
+                </select>
+                <button type="submit">Filter</button>
+            </form>
+            
+            <div class="card-header">
+                <h5>Lateness Records</h5>
+            </div>
+            <div class="card-body table-border-style">
+                <div class="table-responsive">
+                    <table id="latenessTable" class="table table-striped" cellspacing="0" width="100%">
+                        <thead>
+                            <tr>
+                                <th>Employee</th>
+                                <th>Date</th>
+                                <th>Lateness (Minutes)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for record in lateness_records %}
+                            <tr>
+                                <td>{{ record.employee.name }}</td>
+                                <td>{{ record.date }}</td>
+                                <td>{{ record.lateness_minutes }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Notifications Section -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5>Login/Logout Times</h5>
+            </div>
+            <div class="card-body table-border-style">
+                <div class="table-responsive">
+                    <table id="attendanceTable" class="table table-striped" cellspacing="0" width="100%">
+                        <thead>
+                            <tr>
+                                <th class="th-sm">Employee</th>
+                                <th class="th-sm">Login Time</th>
+                                <th class="th-sm">Logout Time</th>
+                                <th class="th-sm">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for record in attendance_records %}
+                            <tr>
+                                <td>{{ record.employee.name }}</td>
+                                <td>{{ record.clock_in }}</td>
+                                <td>{{ record.clock_out }}</td>
+                                <td>
+                                    {% if record.status == "Absent" %}
+                                        <span style="color: red;" class="badge badge-danger">{{ record.status }}</span>  <!-- Kırmızı -->
+                                    {% elif record.status == "Present" %}
+                                        <span style="color: green;" class="badge badge-success">{{ record.status }}</span>  <!-- Yeşil -->
+                                    {% else %}
+                                        <span class="badge badge-warning">{{ record.status }}</span>  <!-- Sarı veya başka bir renk -->
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th>Employee</th>
+                                <th>Login Time</th>
+                                <th>Logout Time</th>
+                                <th>Status</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+        <!-- Leave Applications Section -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        {% csrf_token %}
+                        <h5>Leave Applications</h5>
+                    </div>
+                    <div class="card-body table-border-style">
+                        <div class="table-responsive">
+                            <table id="leaveApplicationTable" class="table table-striped" cellspacing="0" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th class="th-sm">Employee</th>
+                                        <th class="th-sm">Date</th>
+                                        <th class="th-sm">Duration</th>
+                                        <th class="th-sm">Reason</th>
+                                        <th class="th-sm">Status</th>
+                                        <th class="th-sm"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for leave in leaves %}
+                                    <tr>
+                                        <td class="employee">{{leave.employee.name}}</td>
+                                        <td>{{leave.date}}</td>
+                                        <td class="duration">{{leave.duration}}</td>
+                                        <td>{{leave.description}}</td>
+                                        <td>
+                                            <span class="status_value">{{leave.status}}</span>
+                                            <div class="btn-group" role="group">
+                                                <button type="button" class="btn btn-primary dropdown-toggle btnGroupDrop1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" value=""></button>
+                                                <div class="dropdown-menu status_dropdown" aria-labelledby="btnGroupDrop1"> 
+                                                    <a class="dropdown-item" href="#" onclick="changeValue(this)">Not Approved</a>
+                                                    <a class="dropdown-item" href="#" onclick="changeValue(this)">Approved</a>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td><a href="/save-leave-status/{{leave.id}}" class="btn btn-primary save_status disabled">Save</a></td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th>Employee</th>
+                                        <th>Date</th>
+                                        <th>Duration</th>
+                                        <th>Reason</th>
+                                        <th>Status</th>
+                                        <th></th> 
+                                        <a href="{% url 'get_notifications' %}">View Notifications</a>
+
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block scripts %}
+<script type="text/javascript">
+    $(document).ready(function(){
+        // Initialize DataTable for notifications
+        $('#notificationsTable').DataTable();
+
+        // Initialize DataTable for leave applications
+        $('#leaveApplicationTable').dataTable({
+            columnDefs: [{
+                orderable: false,
+                className: 'select-checkbox',
+                targets: 0
+            }],
+            select: {
+                style: 'os',
+                selector: 'td:first-child'
+            }
+        });
+
+        // Dropdown functionality using jQuery
+        $(".dropdown-toggle").on('click', function(e) {
+            var $this = $(this);
+            var $dropdownMenu = $this.siblings(".dropdown-menu");
+
+            // Toggle visibility of the dropdown menu
+            $dropdownMenu.toggleClass("show");
+
+            // Close other dropdowns
+            $(".dropdown-menu").not($dropdownMenu).removeClass("show");
+
+            // Prevent click event from propagating
+            e.stopPropagation();
+        });
+
+        // Handling dropdown item click and status change
+        $("#leaveApplicationTable").on("click", ".status_dropdown a", function(){
+            var txt = $(this).text();
+            var href = $(this).parents('tr').find(".save_status").attr('href');
+            var employee = $(this).parents('tr').find(".employee").text();
+            var duration = $(this).parents('tr').find(".duration").text();
+
+            $(this).parents('td').find('.status_value').text(txt);
+            $(this).parents('tr').find(".save_status").removeClass('disabled');
+            $(this).parents('tr').find(".save_status").attr('href', href+'/?employee='+employee+'&duration='+duration+'&status='+txt);
+        });
+
+        // Close dropdown if clicked outside
+        $(document).on('click', function (e) {
+            if (!$(e.target).closest('.btn-group').length) {
+                $(".dropdown-menu").removeClass("show");
+            }
+        });
+
+
+        // Function to show notification on the screen
+        setInterval(function() {
+    $.ajax({
+        url: "{% url 'get_notifications' %}",  // URL for fetching notifications
+        method: "GET",
+        success: function(response) {
+            let notifications = response.notifications;
+
+            // Check if there are any new notifications
+            if (notifications.length > 0) {
+                notifications.forEach(function(notification) {
+                    showNotification(notification.message);  // Display each new notification
+                });
+            }
+        }
+    });
+}, 5000);  // 5 seconds interval
+
+        // Example usage of sendLateNotification function
+        // sendLateNotification(1, 15); // Replace with actual user ID and lateness minutes
+    });
+</script>
+<script>
+// Function to display notification
+function showNotification(message, id) {
+    const notificationBox = document.createElement('div');
+    notificationBox.classList.add('notification');
+    notificationBox.innerText = message;
+    
+    // Add an event listener to mark the notification as read when clicked
+    notificationBox.addEventListener('click', function() {
+        markNotificationAsRead(id); // Send a request to mark it as read
+        notificationBox.remove(); // Remove the notification box after clicking
+    });
+
+    // Add the notification to the body
+    document.body.appendChild(notificationBox);
+
+    // Remove the notification after 5 seconds if it's not clicked
+    setTimeout(function() {
+        notificationBox.remove();
+    }, 5000);  // Notification disappears after 5 seconds
+}
+
+// Function to mark a notification as read
+function markNotificationAsRead(id) {
+    $.ajax({
+        url: `/mark-notification-as-read/${id}/`,  // POST request to mark notification as read
+        method: 'POST',
+        data: {
+            csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),  // Include CSRF token for security
+        },
+        success: function(response) {
+            console.log(response.message);
+        },
+        error: function(xhr, status, error) {
+            console.error("Error marking notification as read:", error);
+        }
+    });
+}
+
+// Request to check notifications periodically
+setInterval(function() {
+    $.ajax({
+        url: "{% url 'get_notifications' %}",
+        method: "GET",
+        success: function(response) {
+            let notifications = response.notifications;
+            // Check if there are any new notifications
+            if (notifications.length > 0) {
+                notifications.forEach(function(notification) {
+                    showNotification(notification.message, notification.id);  // Display the notification and pass its id
+                });
+            }
+        }
+    });
+}, 5000);  // 5 seconds interval to fetch new notifications
+    </script>
+<style>
+    .notification {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background-color: #f44336;
+        color: white;
+        padding: 15px;
+        border-radius: 5px;
+        z-index: 1000;
+    }
+</style>
+
+<style>
+    .notification {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background-color: #f44336;
+        color: white;
+        padding: 15px;
+        border-radius: 5px;
+        z-index: 1000;
+    }
+    .notification {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #f44336;
+    color: white;
+    padding: 15px;
+    border-radius: 5px;
+    z-index: 1000;
+    animation: fadeIn 1s, fadeOut 1s 4s;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+}
+
+</style>
+
+
+<!-- Add the CSS directly here -->
+<style>
+    /* Dropdown menüsünü sabit konumda tutmak için */
+    .status_dropdown {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        z-index: 1050; /* Diğer içeriklerin üzerine çıkmasını sağlar */
+        min-width: 160px; /* Gerekirse genişlik ayarı yapabilirsiniz */
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+</style>
+{% endblock %}

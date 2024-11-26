@@ -1,0 +1,164 @@
+{% extends "layouts/base.html" %}
+{% block title %} Login/Logout Times {% endblock %}
+{% block content %}
+<div class="pc-container">
+    <div class="pcoded-content">
+        <!-- [ breadcrumb ] start -->
+        <div class="page-header">
+            <div class="page-block">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <div class="page-header-title">
+                            {% csrf_token %}
+                            <h5 class="m-b-10">Login/Logout Times</h5>
+                        </div>
+                        <ul class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+                            <li class="breadcrumb-item">Login/Logout Times</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- [ breadcrumb ] end -->
+
+        <!-- Login/Logout Times Table -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body table-border-style">
+                        <div class="table-responsive">
+                            <table id="attendanceTable" class="table table-striped" cellspacing="0" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th>Employee</th>
+                                        <th>Login Time</th>
+                                        <th>Logout Time</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for record in attendance_records %}
+                                    <tr>
+                                        <td>{{ record.employee.name }}</td>
+                                        <td>{{ record.clock_in }}</td>
+                                        <td>{{ record.clock_out }}</td>
+                                        <td>
+                                            {% if record.status == "Absent" %}
+                                                <span style="color: red;" class="badge badge-danger">{{ record.status }}</span>
+                                            {% elif record.status == "Present" %}
+                                                <span style="color: green;" class="badge badge-success">{{ record.status }}</span>
+                                            {% else %}
+                                                <span class="badge badge-warning">{{ record.status }}</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+{% block scripts %}
+<script type="text/javascript">
+    $(document).ready(function(){
+        $('#attendanceTable').DataTable();  // DataTable for login/logout times
+    });
+</script>
+{% block notification_scripts %}
+<script>
+    function showNotification(message, id) {
+        const notificationBox = document.createElement('div');
+        notificationBox.classList.add('notification');
+        notificationBox.innerText = message;
+        
+        // Add an event listener to mark the notification as read when clicked
+        notificationBox.addEventListener('click', function() {
+            markNotificationAsRead(id); // Bildirimi okundu olarak işaretle
+            notificationBox.remove(); // Bildirimi ekrandan kaldır
+        });
+
+        // Add the notification to the body
+        document.body.appendChild(notificationBox);
+
+        // Remove the notification after 5 seconds if not clicked
+        setTimeout(function() {
+            notificationBox.remove();
+        }, 5000);
+    }
+
+    function markNotificationAsRead(id) {
+        $.ajax({
+            url: `/mark-notification-as-read/${id}/`,  // API endpoint
+            method: 'POST',
+            data: {
+                csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),  // CSRF Token
+            },
+            success: function(response) {
+                console.log(response.message); // Debug: Bildirim başarıyla okundu
+            },
+            error: function(xhr, status, error) {
+                console.error("Error marking notification as read:", error);
+            }
+        });
+    }
+
+    // Bildirimleri düzenli olarak kontrol et ve göster
+    setInterval(function() {
+        $.ajax({
+            url: "{% url 'get_notifications' %}",  // API endpoint
+            method: "GET",
+            success: function(response) {
+                let notifications = response.notifications;
+                if (notifications.length > 0) {
+                    notifications.forEach(function(notification) {
+                        showNotification(notification.message, notification.id);  // Bildirimleri göster
+                    });
+                }
+            }
+        });
+    }, 5000);  // Her 5 saniyede bir bildirim kontrolü
+</script>
+
+<style>
+    .notification {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background-color: #f44336;
+        color: white;
+        padding: 15px;
+        border-radius: 5px;
+        z-index: 1000;
+        animation: fadeIn 1s, fadeOut 1s 4s;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeOut {
+        from {
+            opacity: 1;
+        }
+        to {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+    }
+</style>
+{% endblock %}
+
+{% endblock %}

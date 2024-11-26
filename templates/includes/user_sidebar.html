@@ -1,0 +1,30 @@
+<!-- [ navigation menu ] start -->
+<nav class="pc-sidebar">
+    <div class="navbar-wrapper">
+        <div class="m-header">
+            <a href="#" class="b-brand">
+                <!-- Logo -->
+                <img src="/static/assets/images/logo.png" alt="" class="logo logo-lg" width="50px">
+                <b>Leave Request v1.0</b>
+                <img src="/static/assets/images/logo.png" alt="" class="logo logo-sm">
+            </a>
+        </div>
+        <div class="navbar-content">
+            <ul class="pc-navbar">
+                <li class="pc-item pc-caption">
+                    <label>Navigation</label>
+                </li>
+                <li class="pc-item">
+                    <a href="{% url 'user_dashboard' %}" class="pc-link"><span class="pc-micon"><i class="material-icons-two-tone">home</i></span><span class="pc-mtext">Dashboard</span></a>
+                </li>
+                <li class="pc-item">
+                    <a href="{% url 'apply_leave' %}" class="pc-link"><span class="pc-micon"><i class="material-icons-two-tone">edit</i></span><span class="pc-mtext">Apply Leave</span></a>
+                </li>
+                <li class="pc-item">
+                    <a href="{% url 'leave_list' %}" class="pc-link"><span class="pc-micon"><i class="material-icons-two-tone">list</i></span><span class="pc-mtext">Leave List</span></a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<!-- [ navigation menu ] end -->

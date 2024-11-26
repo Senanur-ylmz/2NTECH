@@ -1,0 +1,235 @@
+{% extends "layouts/user_base.html" %}
+
+{% block title %} Dashboard {% endblock %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+<!-- You can include additional stylesheets for this page -->
+{% endblock stylesheets %}
+
+{% block content %}
+<!-- [ Main Content ] start -->
+<div class="pc-container">
+    <div class="pcoded-content">
+        <!-- [ breadcrumb ] start -->
+        <div class="page-header">
+            <div class="page-block">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <div class="page-header-title">
+                            <h5 class="m-b-10">Dashboard</h5>
+                        </div>
+                        <ul class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="#">Home</a></li>
+                            <li class="breadcrumb-item">Dashboard</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- [ breadcrumb ] end -->
+
+
+        <div class="row justify-content-center">
+            <!-- Dashboard Tab -->
+            <div class="tab-pane fade show active" id="home">
+                <div class="container">
+                    <div class="row" style="margin-bottom: 2rem;">
+                        <div class="col-sm-4">
+                            <div class="card text-white bg-info mb-3" style="max-width: 20rem;">
+                                <div class="card-header">Total Leaves</div>
+                                <div class="card-body">
+                                    <h4 class="card-title">{{ total_leaves }}</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="card text-white bg-info mb-3" style="max-width: 20rem;">
+                                <div class="card-header">Leaves Taken</div>
+                                <div class="card-body">
+                                    <h4 class="card-title">{{ no_of_leaves }}</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="card text-white bg-info mb-3" style="max-width: 20rem;">
+                                <div class="card-header">Remaining Leaves</div>
+                                <div class="card-body">
+                                    <h4 class="card-title">{{ no_of_remaining_leaves }}</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- [ Apply Leave Section ] start -->
+                <div class="col-xl-6 col-md-12">
+                    <div class="card justify-content-center">
+                        <div class="card-header">
+                            <h5>Apply for Leave</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if application_closed == False %}
+                            <form id="applyLeaveForm" method="POST" action="{% url 'apply_leave' %}" autocomplete="off">
+                                {% csrf_token %}
+                                <div class="form-group row">
+                                    <label for="inputEmail3" class="col-sm-2 col-form-label">Leave Type</label>
+                                    <div class="col-sm-10">
+                                        <select class="custom-select my-1 mr-sm-2" id="inlineFormCustomSelectPref"
+                                            name='levae_type' required>
+                                            <option value="Casual Leave">Casual Leave</option>
+                                            <option value="Sick Leave">Sick Leave</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <fieldset class="form-group">
+                                    <div class="row">
+                                        <legend class="col-form-label col-sm-2 pt-0">Duration</legend>
+                                        <div class="col-sm-10">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="DurationRadioOptions"
+                                                    id="inlineRadio1" value="Full Day" checked>
+                                                <label class="form-check-label" for="inlineRadio1">Single Day</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="DurationRadioOptions"
+                                                    id="inlineRadio2" value="Multiple Day">
+                                                <label class="form-check-label" for="inlineRadio2">Multiple Day</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="DurationRadioOptions"
+                                                    id="inlineRadio3" value="Half Day">
+                                                <label class="form-check-label" for="inlineRadio3">Half Day</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                                <!-- Single Day Date -->
+                                <div class="form-group row" id="SingleDateForm">
+                                    <label for="inputPassword3" class="col-sm-2 col-form-label">Date</label>
+                                    <div class="col-sm-10">
+                                        <input id="Date" class="form-control" name='date' type="date" required>
+                                    </div>
+                                </div>
+
+                                <!-- Multiple Day Date Range -->
+                                <div class="form-group row" id="MultipleDateForm" style="display: none;">
+                                    <label for="inputPassword3" class="col-sm-2 col-form-label">Start Date</label>
+                                    <div class="col-sm-4">
+                                        <input id="startDate" class="form-control" name="start_date" type="date"
+                                            required>
+                                    </div>
+                                    <label for="inputPassword3" class="col-sm-2 col-form-label">End Date</label>
+                                    <div class="col-sm-4">
+                                        <input id="EndDate" class="form-control" name="end_date" type="date" required>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="exampleTextarea" class="col-sm-2 col-form-label">Reason</label>
+                                    <div class="col-sm-10">
+                                        <textarea class="form-control" id="exampleTextarea" rows="3" maxlength="150"
+                                            name="reason" placeholder="Enter your reason" style="resize: none;"
+                                            required></textarea>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <div class="col-sm-10 text-center">
+                                        <button type="submit" class="btn btn-primary">Apply</button>
+                                    </div>
+                                </div>
+                            </form>
+                            {% else %}
+                            <p class="card-text text-secondary">{{message}}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <!-- [ Apply Leave Section ] end -->
+ 
+            </div>
+        </div>
+        <!-- Apply leave Tab End -->
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Leave Applications</h5>
+                </div>
+                <div class="card-body table-border-style">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Leave Type</th>
+                                    <th>Date</th>
+                                    <th>Duration</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for leave in leaves_list %}
+                                <tr
+                                    class="
+                                          {% if leave.status == 'Approved' %}table-success{% elif leave.status == 'Pending' %}table-info{% elif leave.status == 'Rejected' %}table-danger{% elif leave.status == 'Cancelled' %}table-warning{% else %}table-active{% endif %}">
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ leave.leave_type }}</td>
+                                    <td>{{ leave.date }}</td>
+                                    <td>{{ leave.duration }}</td>
+                                    <td>{{ leave.status }}</td>
+                                    <td>
+                                        {% if leave.show_delete_button %}
+                                        <a href="/delete-leave-application/{{ leave.id }}"
+                                            class="btn btn-danger">Delete</a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+</div>
+{% endblock content %}
+
+{% block scripts %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- jQuery yükleniyor -->
+
+<script type="text/javascript">
+$(document).ready(function(){
+    $('#exampleTextarea').val(''); //clear value on page load
+
+    // Duration option click event
+    $("input[name$='DurationRadioOptions']").click(function() {
+        var val = $(this).val();  // Get selected value
+
+        // If Single Day or Half Day is selected
+        if ( val == 'Half Day' || val == 'Full Day'){
+            $('#Date').prop('required', true);  // Make single date field required
+            $('#startDate').prop('required', false);  // Remove required from start date
+            $('#EndDate').prop('required', false);  // Remove required from end date
+            $("#MultipleDateForm").hide();  // Hide multiple day form
+            $("#SingleDateForm").show();  // Show single date form
+        } 
+        // If Multiple Day is selected
+        else if ( val == 'Multiple Day' ){
+            $('#Date').prop('required', false);  // Remove required from single date
+            $('#startDate').prop('required', true);  // Make start date required
+            $('#EndDate').prop('required', true);  // Make end date required
+            $("#MultipleDateForm").show();  // Show multiple day form
+            $("#SingleDateForm").hide();  // Hide single date form
+        }
+    });
+});
+
+</script>
+{% endblock scripts %}
+
+{% block javascripts %}
+<script src="/static/assets/js/plugins/apexcharts.min.js"></script>
+<script src="/static/assets/js/pages/dashboard-sale.js"></script>
+{% endblock javascripts %}

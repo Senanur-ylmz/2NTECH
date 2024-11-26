@@ -1,0 +1,150 @@
+{% extends "layouts/base.html" %}
+{% block title %} Lateness Records {% endblock %}
+{% block content %}
+<div class="pc-container">
+    <div class="pcoded-content">
+        <!-- [ breadcrumb ] start -->
+        <div class="page-header">
+            <div class="page-block">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <div class="page-header-title">
+                            {% csrf_token %}
+                            <h5 class="m-b-10">Lateness Records</h5>
+                        </div>
+                        <ul class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+                            <li class="breadcrumb-item">Lateness Records</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- [ breadcrumb ] end -->
+
+        <!-- Geç Kalma Tablosu -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body table-border-style">
+                        <div class="table-responsive">
+                            <table id="latenessTable" class="table table-striped" cellspacing="0" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th>Employee</th>
+                                        <th>Date</th>
+                                        <th>Lateness (Minutes)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for record in lateness_records %}
+                                    <tr>
+                                        <td>{{ record.employee.name }}</td>
+                                        <td>{{ record.date }}</td>
+                                        <td>{{ record.lateness_minutes }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+{% block scripts %}
+<script type="text/javascript">
+    $(document).ready(function(){
+        $('#latenessTable').DataTable();  // DataTable for lateness records
+    });
+</script>
+{% block notification_scripts %}
+<script>
+function showNotification(message, id) {
+    const notificationBox = document.createElement('div');
+    notificationBox.classList.add('notification');
+    notificationBox.innerText = message;
+    
+    // Add the notification to the body
+    document.body.appendChild(notificationBox);
+
+    // Mark as read after 5 seconds automatically
+    setTimeout(function() {
+        markNotificationAsRead(id); // Mark as read
+        notificationBox.remove(); // Remove notification box
+    }, 5000); // 5 seconds duration
+}
+
+function markNotificationAsRead(id) {
+    $.ajax({
+        url: `/mark-notification-as-read/${id}/`,  // API endpoint
+        method: 'POST',
+        data: {
+            csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),  // CSRF Token
+        },
+        success: function(response) {
+            console.log(response.message); // Debug: Notification marked as read
+        },
+        error: function(xhr, status, error) {
+            console.error("Error marking notification as read:", error);
+        }
+    });
+}
+
+// Regularly check for notifications and display them
+setInterval(function() {
+    $.ajax({
+        url: "{% url 'get_notifications' %}",  // API endpoint for fetching notifications
+        method: "GET",
+        success: function(response) {
+            let notifications = response.notifications;
+            if (notifications.length > 0) {
+                notifications.forEach(function(notification) {
+                    showNotification(notification.message, notification.id);  // Display notifications
+                });
+            }
+        }
+    });
+}, 5000);  // Every 5 seconds
+
+</script>
+
+<style>
+    .notification {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background-color: #f44336;
+        color: white;
+        padding: 15px;
+        border-radius: 5px;
+        z-index: 1000;
+        animation: fadeIn 1s, fadeOut 1s 4s;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeOut {
+        from {
+            opacity: 1;
+        }
+        to {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+    }
+</style>
+{% endblock %}
+
+{% endblock %}

@@ -1,0 +1,120 @@
+{% extends "layouts/user_base.html" %}
+{% block title %} Leave List {% endblock %}
+
+{% block content %}
+<div class="pc-container">
+    <div class="pcoded-content">
+        <!-- Breadcrumb -->
+        <div class="page-header">
+            <div class="page-block">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <div class="page-header-title">
+                            <h5>Leave Applications</h5>
+                        </div>
+                        <ul class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'user_dashboard' %}">Home</a></li>
+                            <li class="breadcrumb-item">Leave Applications</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Leave Applications Table -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Your Leave Applications</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Type</th>
+                                        <th>Date</th>
+                                        <th>Duration</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for leave in leaves_list %}
+                                    <tr>
+                                        <td>{{ forloop.counter }}</td>
+                                        <td>{{ leave.leave_type }}</td>
+                                        <td>{{ leave.date }}</td>
+                                        <td>{{ leave.duration }}</td>
+                                        <td>
+                                            {% if leave.status == "Approved" %}
+                                            <span style="color: white; background-color: green; padding: 5px 10px; border-radius: 5px;">Approved</span>
+                                            {% elif leave.status == "Waiting" %}
+                                            <span style="color: black; background-color: yellow; padding: 5px 10px; border-radius: 5px;">Waiting</span>
+                                            {% elif leave.status == "Rejected" %}
+                                            <span style="color: white; background-color: red; padding: 5px 10px; border-radius: 5px;">Rejected</span>
+                                            {% else %}
+                                            <span style="color: white; background-color: gray; padding: 5px 10px; border-radius: 5px;">{{ leave.status }}</span>
+                                            {% endif %}
+                                            
+                                        </td>
+                                        <td>
+                                            {% if leave.show_delete_button %}
+                                            <a href="/delete-leave-application/{{ leave.id }}"
+                                                class="btn btn-danger">Delete</a>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="5" class="text-center">No leave applications found.</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- jQuery yükleniyor -->
+
+<script type="text/javascript">
+$(document).ready(function(){
+    $('#exampleTextarea').val(''); //clear value on page load
+
+    // Duration option click event
+    $("input[name$='DurationRadioOptions']").click(function() {
+        var val = $(this).val();  // Get selected value
+
+        // If Single Day or Half Day is selected
+        if ( val == 'Half Day' || val == 'Full Day'){
+            $('#Date').prop('required', true);  // Make single date field required
+            $('#startDate').prop('required', false);  // Remove required from start date
+            $('#EndDate').prop('required', false);  // Remove required from end date
+            $("#MultipleDateForm").hide();  // Hide multiple day form
+            $("#SingleDateForm").show();  // Show single date form
+        } 
+        // If Multiple Day is selected
+        else if ( val == 'Multiple Day' ){
+            $('#Date').prop('required', false);  // Remove required from single date
+            $('#startDate').prop('required', true);  // Make start date required
+            $('#EndDate').prop('required', true);  // Make end date required
+            $("#MultipleDateForm").show();  // Show multiple day form
+            $("#SingleDateForm").hide();  // Hide single date form
+        }
+    });
+});
+
+</script>
+{% endblock scripts %}
+
+{% block javascripts %}
+<script src="/static/assets/js/plugins/apexcharts.min.js"></script>
+<script src="/static/assets/js/pages/dashboard-sale.js"></script>
+{% endblock javascripts %}

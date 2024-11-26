@@ -1,0 +1,101 @@
+{% extends "layouts/base-fullscreen.html" %}
+
+{% load static %}  <!-- Load static files here -->
+
+{% block title %} Sign UP {% endblock %} 
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+<link href="{% static 'css/bootstrap.css' %}?rand={{ rand }}" rel="stylesheet">
+<link href="{% static 'fonts/font-awesome.min.css' %}?rand={{ rand }}" rel="stylesheet">
+<link href="{% static 'css/custom.css' %}?rand={{ rand }}" rel="stylesheet">
+<link href="{% static 'css/login.css' %}?rand={{ rand }}" rel="stylesheet">
+{% endblock stylesheets %}
+
+{% block content %}
+
+<!-- [ auth-signup ] start -->
+<div class="auth-wrapper">
+    <div class="auth-content">
+        <div class="card">
+            <div class="row align-items-center text-center">
+                <div class="col-md-12">
+                    <div class="card-body">
+                        <img src="{% static 'assets/images/logo-dark.svg' %}" alt="Logo" class="img-fluid mb-4">
+                        <h4 class="mb-3 f-w-400">Sign UP</h4>
+
+                        <p>
+                            {% if messages %}
+                                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                    {% for message in messages %}
+                                        <p>{{ message }}</p>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                Add your credentials
+                            {% endif %}
+                        </p>
+
+                        <form role="form" method="post" action="{% url 'register' %}">
+                            {% csrf_token %}
+
+                            <div class="input-group mb-3">
+                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                {{ form.username }}  <!-- Render the username field -->
+                            </div>
+                            <span class="text-danger">{{ form.username.errors }}</span>  <!-- Display username errors -->
+
+                            <div class="input-group mb-3">
+                                <span class="input-group-text"><i data-feather="mail"></i></span>
+                                {{ form.email }}  <!-- Render the email field -->
+                            </div>
+                            <span class="text-danger">{{ form.email.errors }}</span>  <!-- Display email errors -->
+
+                            <div class="input-group mb-4">
+                                <span class="input-group-text"><i data-feather="lock"></i></span>
+                                {{ form.password1 }}  <!-- Render password1 field -->
+                            </div>
+                            <span class="text-danger">{{ form.password1.errors }}</span>  <!-- Display password1 errors -->
+
+                            <div class="input-group mb-4">
+                                <span class="input-group-text"><i data-feather="lock"></i></span>
+                                {{ form.password2 }}  <!-- Render password2 field -->
+                            </div>
+                            <span class="text-danger">{{ form.password2.errors }}</span>  <!-- Display password2 errors -->
+
+                            <div class="form-group text-start mt-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" checked>
+                                    <label class="form-check-label" for="flexCheckChecked">
+                                        Agree to <a href="#!">terms</a>.
+                                    </label>
+                                </div>
+                            </div>
+
+                            <br />
+                            <button type="submit" name="register" class="btn btn-primary btn-block mb-4">Sign UP</button>
+
+                        </form>
+
+                        <p class="mb-2">Already have an account? 
+                            <a href="{% url 'login' %}" class="f-w-400">Sign IN</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- [ auth-signup ] end -->
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+<script src="{% static 'js/jquery.js' %}?rand={{ rand }}"></script>
+<script src="{% static 'js/bootstrap.min.js' %}?rand={{ rand }}"></script>
+<script src="{% static 'js/custom.js' %}?rand={{ rand }}"></script>
+{% endblock javascripts %}

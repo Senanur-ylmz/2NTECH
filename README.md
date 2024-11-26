@@ -5,7 +5,13 @@ This project is designed to track the daily check-in and check-out times of empl
 ## Project Overview
 
 The application automatically records the first check-in and last check-out times for each employee daily. In case of tardiness, the system will notify the authorized personnel. Annual leave is deducted based on tardiness, and employees can view and request their leave, which can be approved or rejected by the authorized staff.
+
+![image](https://github.com/user-attachments/assets/8aa367c9-9a49-4e7b-940a-a6e22ec418ec)
+![image](https://github.com/user-attachments/assets/de7e1f8b-eb66-4b40-b997-76bda2aeed1e)
+
 ![image](https://github.com/user-attachments/assets/dea4aecf-7e61-4970-85d9-1f99eb7cdb5a)
+![Adsız](https://github.com/user-attachments/assets/efbb0c17-a856-429b-995e-7750ca06c9ad)
+
 
 ### Key Features:
 
